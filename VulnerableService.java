@@ -32,15 +32,4 @@ public class VulnerableService {
         return "Comment posted: " + comment;
     }
 
-    public String executeCode(String code) throws ScriptException, javax.script.ScriptException {
-       
-        ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
-        Object result = engine.eval(code);
-        return "Executed: " + result;
-    }
-
-    public String getConfig() {
-        
-        return "DB Password: password123, API Key: secret-api-key";
-    }
 }
