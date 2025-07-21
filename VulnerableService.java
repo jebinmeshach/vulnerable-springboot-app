@@ -1,12 +1,11 @@
+<CODE>
 package com.example.demo.service;
 
 import com.example.demo.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.datasource.init.ScriptException;
 import org.springframework.stereotype.Service;
+import org.owasp.encoder.Encode;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import java.sql.*;
 
 @Service
@@ -16,31 +15,33 @@ public class VulnerableService {
     private UserRepository userRepository;
 
     public String getUser(String username) throws SQLException {
-        // SQL Injection Vulnerability
         Connection connection = DriverManager.getConnection("jdbc:h2:mem:testdb", "sa", "");
-        Statement stmt = connection.createStatement();
-        String query = "SELECT * FROM users WHERE username = '" + username + "'";
-        ResultSet rs = stmt.executeQuery(query);
-        if (rs.next()) {
-            return "User: " + rs.getString("username");
+        String query = "SELECT * FROM users WHERE username = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, username);
+            try (ResultSet rs = preparedStatement.executeQuery()) {
+                if (rs.next()) {
+                    return "User: " + rs.getString("username");
+                }
+            }
         }
         return "User not found";
     }
 
     public String postComment(String comment) {
-        // XSS Vulnerability
-        return "Comment posted: " + comment;
+        return "Comment posted: " + Encode.forHtml(comment);
     }
 
-    public String executeCode(String code) throws ScriptException, javax.script.ScriptException {
-        // Insecure Deserialization / RCE
-        ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
-        Object result = engine.eval(code);
-        return "Executed: " + result;
+    public String executeCode(String code) throws  javax.script.ScriptException {
+        //  Avoid using ScriptEngine with user-supplied input entirely.  If absolutely necessary,
+        //  consider strict whitelisting/sandboxing approaches which are beyond the scope of this simple fix.
+        //  Instead, provide a more specific and safer solution.
+        throw new UnsupportedOperationException("Arbitrary code execution is disabled.");
     }
+
 
     public String getConfig() {
-        // Sensitive Data Exposure
-        return "DB Password: password123, API Key: secret-api-key";
+       // Sensitive data should not be hardcoded.  Retrieve from secure configuration mechanisms.
+        throw new UnsupportedOperationException("Retrieving configuration is not supported in this demonstration.");
     }
 }
