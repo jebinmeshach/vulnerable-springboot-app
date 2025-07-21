@@ -16,7 +16,7 @@ public class VulnerableService {
     private UserRepository userRepository;
 
     public String getUser(String username) throws SQLException {
-        // SQL Injection Vulnerability
+        
         Connection connection = DriverManager.getConnection("jdbc:h2:mem:testdb", "sa", "");
         Statement stmt = connection.createStatement();
         String query = "SELECT * FROM users WHERE username = '" + username + "'";
@@ -28,19 +28,19 @@ public class VulnerableService {
     }
 
     public String postComment(String comment) {
-        // XSS Vulnerability
+       
         return "Comment posted: " + comment;
     }
 
     public String executeCode(String code) throws ScriptException, javax.script.ScriptException {
-        // Insecure Deserialization / RCE
+       
         ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
         Object result = engine.eval(code);
         return "Executed: " + result;
     }
 
     public String getConfig() {
-        // Sensitive Data Exposure
+        
         return "DB Password: password123, API Key: secret-api-key";
     }
 }
